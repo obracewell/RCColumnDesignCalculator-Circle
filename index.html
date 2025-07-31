@@ -388,12 +388,21 @@ const barTable = [
             const fy = parseFloat(document.getElementById('fy').value);
             const Pu = getPuValue();
             const Ag = parseFloat(document.getElementById('Ag').value);
-            const dimensionInput = document.getElementById('dimension');
-            let dimension = dimensionInput ? parseFloat(dimensionInput.value) : NaN;
             
             const confine = document.getElementById('confine').value;
-            const phi = parseFloat(document.getElementById('phi').value);
-            const alpha = parseFloat(document.getElementById('alpha').value);
+
+            // Set phi and alpha based on confinement
+             let phi, alpha;
+             if (confine === 'spiral') {
+                 phi = 0.75;
+                 alpha = 0.85;
+            } else if (confine === 'tied') {
+                phi = 0.65;
+                alpha = 0.80;
+            } else {
+                alert("Please select a confinement type.");
+            return;
+            }
 
             // Validate inputs
             if (isNaN(fc) || isNaN(fy) || isNaN(Pu) || isNaN(Ag)) {
@@ -412,8 +421,6 @@ const barTable = [
                 allowedQuantities = [4, 6, 8];
             } else if (confine === 'spiral') {
                 allowedQuantities = [6, 8, 10];
-            }
-            return;
             }
 
             // Filter bar table by confinement allowed quantities
