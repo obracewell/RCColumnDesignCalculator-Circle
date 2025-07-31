@@ -319,9 +319,7 @@ const barTable = [
             const fy = parseFloat(document.getElementById('fy').value);
             const Pu = getPuValue();
             const rhoi = parseFloat(document.getElementById('rhoi').value) / 100;
-            const confine = parseFloat(document.getElementById('confine').value);
-            const phi = 0.65; //strength reduction factor
-            const alpha = 0.8; //column interaction coefficient
+            const confine = document.getElementById('confine').value;
             
             // Validate inputs
             if (isNaN(fc) || isNaN(fy) || isNaN(Pu) || isNaN(rhoi)) {
@@ -338,7 +336,6 @@ const barTable = [
                 alpha = 0.80;
             } else {
                 alert("Please select a confinement type.");
-                return;
             }
 
             let output = `<p class="success">Design:</p><br><br>`;
@@ -395,6 +392,8 @@ const barTable = [
             let dimension = dimensionInput ? parseFloat(dimensionInput.value) : NaN;
             
             const confine = document.getElementById('confine').value;
+            const phi = parseFloat(document.getElementById('phi').value);
+            const alpha = parseFloat(document.getElementById('alpha').value);
 
             // Validate inputs
             if (isNaN(fc) || isNaN(fy) || isNaN(Pu) || isNaN(Ag)) {
@@ -420,7 +419,7 @@ const barTable = [
             // Filter bar table by confinement allowed quantities
             const filteredTable = barTable.filter(row => allowedQuantities.includes(row.barQuant));
             //Filter bar table
-            const sortedTable = barTable.sort((a, b) => a.area - b.area);
+            const sortedTable = filteredTable.sort((a, b) => a.area - b.area);
 
               let less = [];
               let equal = [];
@@ -560,9 +559,7 @@ const barTable = [
         const x = dimension;
         const b = barSel;
         const t = `${barTSel} @ ${Space.toFixed(0)}"`;
-        const db = barD;
-        const dbr = barTD;
-        const a = x - (2 * 1.5) - (2 * db) - (2 * dbr);  
+        const Dc = dimension - 3;  
         const S = Space.toFixed(0);
 
         output += `<strong>Final Design:</strong><br><br>`;
@@ -573,11 +570,11 @@ const barTable = [
         // --- Display image based on number of bars ---
         let imageURL = "";
         if (barQ === 4) {
-            imageURL = "https://raw.githubusercontent.com/obracewell/RCColumnDesignCalculator-Square/refs/heads/main/assets/4barsquare.png";
+            imageURL = "https://raw.githubusercontent.com/obracewell/RCColumnDesignCalculator-Circle/refs/heads/main/assets/4barcircletie.png";
         } else if (barQ === 6) {
-            imageURL = "https://raw.githubusercontent.com/obracewell/RCColumnDesignCalculator-Square/refs/heads/main/assets/6barsquare.png";
+            imageURL = "https://raw.githubusercontent.com/obracewell/RCColumnDesignCalculator-Circle/refs/heads/main/assets/6barcircletie.png";
         } else if (barQ === 8) {
-            imageURL = "https://raw.githubusercontent.com/obracewell/RCColumnDesignCalculator-Square/refs/heads/main/assets/8barsquare.png";
+            imageURL = "https://raw.githubusercontent.com/obracewell/RCColumnDesignCalculator-Circle/refs/heads/main/assets/8barcircletie.png";
         }
 
     if (imageURL !== "") {
@@ -585,12 +582,10 @@ const barTable = [
         <div class="diagram-wrapper">
             <img src="${imageURL}" alt="${barQ} bars tie diagram" class="imagediagram">
             <ul>
-                <li><strong>x</strong> = ${x} in</li>
+                <li><strong>D</strong> = ${x} in</li>
+                <li><strong>D<sub>c</sub></strong> = ${Dc} in</li>
                 <li><strong>b</strong> = #${b}</li>
                 <li><strong>t</strong> = #${t}</li>
-                 <li><strong>d<sub>b</sub></strong> = ${db} in</li>
-                <li><strong>d<sub>br</sub></strong> = ${dbr} in</li>
-                <li><strong>a</strong> = ${a.toFixed(2)} in</li>
                 <li><strong>S</strong> = ${Space.toFixed(0)} in</li>
             </ul>
         </div>
@@ -608,6 +603,21 @@ const barTable = [
         document.getElementById('barQ').value = savedBarQ;
         document.getElementById('barSel').value = savedBarSel;
         document.getElementById('barD').value = savedBarD;
+    }
+
+    function finalDesignCalc() {
+        const confine = document.getElementById('confine').value;
+        if (confine === "tied") {
+            tieDesignCalc();
+        } else if (confine === "spiral") {
+            spiralDesignCalc();
+        } else {
+            alert("Please select a confinement type first.");
+        }
+    }
+
+    function spiralDesignCalc() {
+        alert("Spiral design calculation is not yet implemented!");
     }
 
     function fillBarSelection() {
@@ -641,7 +651,7 @@ const barTable = [
         document.getElementById("dimension").value = dimension;
         document.getElementById("Ag").value = Ag;
 
-        const summary = `${dimension} in × ${dimension} in → Ag = ${Ag} in²`;
+        const summary = `${dimension} in diameter → Ag = ${Ag} in²`;
         const outputDiv = document.getElementById("customOutput1");
         if (outputDiv) {
             outputDiv.innerHTML = `Selected: <strong>${summary}</strong>`;
