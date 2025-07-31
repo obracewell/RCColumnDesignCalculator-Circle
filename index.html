@@ -393,20 +393,32 @@ const barTable = [
             const Ag = parseFloat(document.getElementById('Ag').value);
             const dimensionInput = document.getElementById('dimension');
             let dimension = dimensionInput ? parseFloat(dimensionInput.value) : NaN;
-            const phi = 0.65; //strength reduction factor
-            const alpha = 0.8; //column interaction coefficient
+            
+            const confine = document.getElementById('confine').value;
 
             // Validate inputs
             if (isNaN(fc) || isNaN(fy) || isNaN(Pu) || isNaN(Ag)) {
                 alert("Please enter all values.");
             return;
             }
+
             //calculate Astreq
              let Astreq = ((Pu * 1000) / (phi * alpha) - 0.85 * fc * Ag) / (fy - 0.85 * fc);
             
             output += `\nRequired steel area, A<sub>st,req</sub>: ${Astreq.toFixed(2)} in<sup>2</sup><br><br>`;
             output += `Bar Options:<br>`;
 
+            let allowedQuantities;
+            if (confine === 'tied') {
+                allowedQuantities = [4, 6, 8];
+            } else if (confine === 'spiral') {
+                allowedQuantities = [6, 8, 10];
+            }
+            return;
+            }
+
+            // Filter bar table by confinement allowed quantities
+            const filteredTable = barTable.filter(row => allowedQuantities.includes(row.barQuant));
             //Filter bar table
             const sortedTable = barTable.sort((a, b) => a.area - b.area);
 
