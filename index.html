@@ -209,8 +209,16 @@
         <option value="6">6</option>
         <option value="7">7</option>
     </select>
-   
     <br>
+
+    <label for="trans">Confinement System: </label>
+    <select id="trans">
+        <option value="">Select</option>
+        <option value="0">Tie</option>
+        <option value="1">Spiral</option>
+    </select>
+    <br>
+    
     <a href="#" onclick="showModal(); return false;" class="info-link">Important Input Tip!</a>
     <br>
     
@@ -301,11 +309,12 @@ const barTable = [
             const fy = parseFloat(document.getElementById('fy').value);
             const Pu = getPuValue();
             const rhoi = parseFloat(document.getElementById('rhoi').value) / 100;
+            const trans = parseFloat(document.getElementById('trans').value);
             const phi = 0.65; //strength reduction factor
             const alpha = 0.8; //column interaction coefficient
             
             // Validate inputs
-            if (isNaN(fc) || isNaN(fy) || isNaN(Pu) || isNaN(rhoi)) {
+            if (isNaN(fc) || isNaN(fy) || isNaN(Pu) || isNaN(rhoi) || isNaN(trans)) {
                 alert("Please enter all values.");
                 return;
             }
