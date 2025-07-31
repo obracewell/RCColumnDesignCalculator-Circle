@@ -70,7 +70,7 @@
             font-weight: bold;
         }
         .image {
-            width: 335px;
+            width: 400px;
             height: auto;
         }
         .imagediagram {
@@ -108,6 +108,46 @@
            border: 1px solid #333;
            padding: 5px 10px;
         text-align: center;
+        }
+        .modal {
+          display: none; 
+          position: fixed;
+          z-index: 999;
+          padding-top: 60px;
+          left: 0; top: 0;
+          width: 100%; height: 100%;
+          overflow: auto;
+          background-color: rgba(0,0,0,0.6); /* Dimmed background */
+        }
+        .modal-content {
+          position: relative;
+          margin: auto;
+          background-color: white;
+          padding: 20px;
+          border-radius: 8px;
+          width: 334px;
+          height: 200px;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+          text-align: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .modal-img {
+          max-width: 100%;
+          height: auto;
+        }
+        .close-btn {
+          position: absolute;
+          top: 10px;
+          right: 14px;
+          font-size: 26px;
+          font-weight: bold;
+          color: red;
+          background: none;
+          border: none;
+          cursor: pointer;
+          z-index: 1000;
         }
     </style>
 </head>
@@ -169,24 +209,14 @@
         <option value="6">6</option>
         <option value="7">7</option>
     </select>
+   
     <br>
-
+    <a href="#" onclick="showModal(); return false;" class="info-link">Important Input Tip!</a>
+    <br>
+    
     <button onclick="performAgSelect()">Calculate</button>
 
     <div id="output" class="output"></div>
-
-    <div id="columnOptions" style="display:none; margin-top: 10px;">
-    <p id="optionDescriptions"></p>
-
-    <label for="agChoice"><strong>Choose Ag to use:</strong></label>
-    <select id="agChoice" onchange="handleAgSelection()">
-        <option value="">Select one</option>
-    </select>
-</div>
-
-<button id="continueBtn" onclick="continueCalculation()" style="display:none; margin-top: 10px;">
-    Continue Calculation
-</button>
 
 <div id = "steelResults" class="output" style="margin-top: 15px;"></div>
    
@@ -299,14 +329,22 @@ const barTable = [
             output += `Round Up: ${sideLarge} in × ${sideLarge} in, A<sub>g</sub> = ${AgLarge} in<sup>2</sup><br>`;
 
             output += `
-              <p style="margin-top: 20px;">Choose an Option and Continue Design</p>
-              <label for="dimension"> Length/Width of Column (in): </label>
-              <input type="number" id="dimension"><br>
-              <label for="Ag">Area of concrete for chosen dimensions, A<sub>g</sub> (in<sup>2</sup>): </label>
-              <input type="number" id="Ag" step="0.01"><br>
+              <p style="margin-top: 20px;">Choose a size option and continue:</p>
+              <label for="agOptionSelect"><strong>Select Column Size:</strong></label><br>
+              <select id="agOptionSelect" onchange="fillAgSelection()">
+                  <option value="">Choose an option</option>
+                  <option value="${sideSmall},${AgSmall}">${sideSmall} in × ${sideSmall} in → Ag = ${AgSmall} in²</option>
+                  <option value="${sideLarge},${AgLarge}">${sideLarge} in × ${sideLarge} in → Ag = ${AgLarge} in²</option>
+              </select>
+              <br><br>
+              <!-- Hidden inputs still used to store selected values -->
+              <input type="hidden" id="dimension">
+              <input type="hidden" id="Ag" step="0.01">
+              
+              <div id="customOutput1" style="margin-top: 15px;"><br></div>
               <button onclick="continueCalculation()">Continue Calculation</button>
-              <div id="customOutput1" style="margin-top: 15px; font-weight: bold;"><br></div>
-`;
+            `;
+
               document.getElementById('output').innerHTML += output;
             }
         
@@ -370,24 +408,43 @@ const barTable = [
                             <td>${row.barDia}</td>
                           </tr>`;
                  });
-              output += `</table>`;
+           output += `</table>`;
+            
+            // Populate the bar option dropdown
+            let barSelectHTML = `<option value="">Choose an option</option>`;
+            selectedRows.forEach(row => {
+              const valueString = `${row.barQuant},${row.barSelection},${row.area},${row.barDia}`;
+              barSelectHTML += `<option value="${valueString}">${row.barQuant} bars - #${row.barSelection} - ${row.area} in² - ${row.barDia} in</option>`;
+            });
+
+            // After setting innerHTML of 'output', update the select dropdown
+            setTimeout(() => {
+              const barSelect = document.getElementById("barOptionSelect");
+              if (barSelect) {
+                barSelect.innerHTML = barSelectHTML;
+              }
+            }, 0);
+
 
             output += `The four corner bars must be the same size. When using 6 or 8 bars, the additonal bars can be a secondary size.<br>`;
             output += `Use <a href="https://obracewell.github.io/RCBeamCalculator-Tables/" target="_blank" class="styled-link">Table 3</a> to make a different combination on your own.<br>`;
             output += `This program can only continue with tie design for design with all bars the same size.<br>`;
 
             output += `
-              <p style="margin-top: 20px;">Choose an Option and Continue Design</p>
-              <label for="Ast">Area of steel for chosen bar selection, A<sub>st</sub> (in<sup>2</sup>): </label>
-              <input type="number" id="Ast" step="0.01"><br>
-              <label for="barQ">Number of Bars: </label>
-              <input type="number" id="barQ"><br>
-              <label for="barSel">Bar Number (#): </label>
-              <input type="number" id="barSel"><br>
-              <label for="barD">Bar Diameter (in): </label>
-              <input type="number" id="barD"><br>
-              <button onclick="tieDesignCalc()">Continue Calculation</button>
-              <div id="customOutput2" style="margin-top: 15px; font-weight: bold;"><br></div>
+            <p style="margin-top: 20px;">Choose a bar option and continue design:</p>
+            <label for="barOptionSelect"><strong>Select a Bar Option:</strong></label><br>
+            <select id="barOptionSelect" onchange="fillBarSelection()">
+                <option value="">Choose an option</option>
+            </select>
+            <br><br>
+            <!-- Hidden inputs still used to store selected values -->
+            <input type="hidden" id="Ast">
+            <input type="hidden" id="barQ">
+            <input type="hidden" id="barSel">
+            <input type="hidden" id="barD">
+            
+            <div id="customOutput2" style="margin-top: 15px;"><br></div>
+            <button onclick="tieDesignCalc()">Continue Calculation</button>
             `;
 
             const savedAst = document.getElementById('Ast')?.value || '';
@@ -509,9 +566,62 @@ const barTable = [
         document.getElementById('barSel').value = savedBarSel;
         document.getElementById('barD').value = savedBarD;
     }
-          
 
+    function fillBarSelection() {
+        const dropdown = document.getElementById("barOptionSelect");
+        const selected = dropdown.value;
+
+        if (!selected) return;
+
+        const [barQ, barSel, area, barD] = selected.split(",").map(parseFloat);
+
+        document.getElementById("barQ").value = barQ;
+        document.getElementById("barSel").value = barSel;
+        document.getElementById("Ast").value = area;
+        document.getElementById("barD").value = barD;
+
+        const summary = `${barQ} bars - #${barSel} - ${area} in² - ${barD} in`;
+        const outputDiv = document.getElementById("customOutput2");
+        if (outputDiv) {
+            outputDiv.innerHTML = `Selected: <strong>${summary}</strong>`;
+        }
+    }
+
+    function fillAgSelection() {
+        const dropdown = document.getElementById("agOptionSelect");
+        const selected = dropdown.value;
+
+        if (!selected) return;
+
+        const [dimension, Ag] = selected.split(",").map(parseFloat);
+
+        document.getElementById("dimension").value = dimension;
+        document.getElementById("Ag").value = Ag;
+
+        const summary = `${dimension} in × ${dimension} in → Ag = ${Ag} in²`;
+        const outputDiv = document.getElementById("customOutput1");
+        if (outputDiv) {
+            outputDiv.innerHTML = `Selected: <strong>${summary}</strong>`;
+        }
+    }
+
+function showModal() {
+  document.getElementById('infoModal').style.display = 'block';
+}
+
+function closeModal() {
+  document.getElementById('infoModal').style.display = 'none';
+}
+        
     </script>
+
+<div id="infoModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal()">&times;</span>
+    <img src="https://raw.githubusercontent.com/obracewell/RCColumnDesignCalculator-Square/refs/heads/main/assets/resettipimage.png" alt="Refresh website if changing inputs" class="modal-img">
+  </div>
+</div>
+    
 <footer class="site-footer">
     <p>Reinforced Concrete Calculator created by Olivia Bracewell, UF Herbert Wertheim College of Engineering</p>
 </footer>
