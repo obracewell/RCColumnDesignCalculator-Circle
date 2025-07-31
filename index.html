@@ -211,11 +211,11 @@
     </select>
     <br>
 
-    <label for="trans">Confinement System: </label>
-    <select id="trans">
+    <label for="confine">Confinement System: </label>
+    <select id="confine">
         <option value="">Select</option>
-        <option value="0">Tie</option>
-        <option value="1">Spiral</option>
+        <option value="tied">Tied</option>
+        <option value="spiral">Spiral</option>
     </select>
     <br>
     
@@ -235,34 +235,44 @@
 const barTable = [
           { barQuant: 4, barSelection: 4, barDia: 0.5, area: 0.78 },
           { barQuant: 6, barSelection: 4, barDia: 0.5, area: 1.18 },
-          { barQuant: 8, barSelection: 4, barDia: 0.5, area: 1.57},
-          { barQuant: 4, barSelection: 5, barDia: 0.625, area: 1.23},
+          { barQuant: 8, barSelection: 4, barDia: 0.5, area: 1.57 },
+          { barQuant: 10, barSelection: 4, barDia: 0.5, area: 1.96 },
+          { barQuant: 4, barSelection: 5, barDia: 0.625, area: 1.23 },
           { barQuant: 6, barSelection: 5, barDia: 0.625, area: 1.84 },
           { barQuant: 8, barSelection: 5, barDia: 0.625, area: 2.45 },
+          { barQuant: 10, barSelection: 5, barDia: 0.625, area: 3.07 },
           { barQuant: 4, barSelection: 6, barDia: 0.75, area: 1.77 },
           { barQuant: 6, barSelection: 6, barDia: 0.75, area: 2.65 },
           { barQuant: 8, barSelection: 6, barDia: 0.75, area: 3.53 },
+          { barQuant: 10, barSelection: 6, barDia: 0.75, area: 4.42 },
           { barQuant: 4, barSelection: 7, barDia: 0.875, area: 2.41 },
           { barQuant: 6, barSelection: 7, barDia: 0.875, area: 3.61 },
           { barQuant: 8, barSelection: 7, barDia: 0.875, area: 4.81 },
+          { barQuant: 10, barSelection: 7, barDia: 0.875, area: 6.01 },
           { barQuant: 4, barSelection: 8, barDia: 1.0, area: 3.14 },
           { barQuant: 6, barSelection: 8, barDia: 1.0, area: 4.71 },
           { barQuant: 8, barSelection: 8, barDia: 1.0, area: 6.28 },
+          { barQuant: 10, barSelection: 8, barDia: 1.0, area: 7.85 },
           { barQuant: 4, barSelection: 9, barDia: 1.128, area: 4.00 },
           { barQuant: 6, barSelection: 9, barDia: 1.128, area: 6.00 },
           { barQuant: 8, barSelection: 9, barDia: 1.128, area: 8.00 },
+          { barQuant: 10, barSelection: 9, barDia: 1.128, area: 10.00 },
           { barQuant: 4, barSelection: 10, barDia: 1.270, area: 5.06 },
           { barQuant: 6, barSelection: 10, barDia: 1.270, area: 7.59 },
           { barQuant: 8, barSelection: 10, barDia: 1.270, area: 10.12 },
+          { barQuant: 10, barSelection: 10, barDia: 1.270, area: 12.66 },
           { barQuant: 4, barSelection: 11, barDia: 1.410, area: 6.25 },
           { barQuant: 6, barSelection: 11, barDia: 1.410, area: 9.37 },
           { barQuant: 8, barSelection: 11, barDia: 1.410, area: 12.50 },
+          { barQuant: 10, barSelection: 11, barDia: 1.410, area: 15.62 },
           { barQuant: 4, barSelection: 14, barDia: 1.693, area: 9.00 },
           { barQuant: 6, barSelection: 14, barDia: 1.693, area: 13.50 },
           { barQuant: 8, barSelection: 14, barDia: 1.693, area: 18.00 },
+          { barQuant: 10, barSelection: 14, barDia: 1.693, area: 22.50 },
           { barQuant: 4, barSelection: 18, barDia: 2.257, area: 16.00 },
           { barQuant: 6, barSelection: 18, barDia: 2.257, area: 24.00 },
           { barQuant: 8, barSelection: 18, barDia: 2.257, area: 32.00 },
+          { barQuant: 10, barSelection: 18, barDia: 2.257, area: 40.00 },
         ];
         
         function toggleLoadInputs() {
@@ -309,13 +319,25 @@ const barTable = [
             const fy = parseFloat(document.getElementById('fy').value);
             const Pu = getPuValue();
             const rhoi = parseFloat(document.getElementById('rhoi').value) / 100;
-            const trans = parseFloat(document.getElementById('trans').value);
+            const confine = parseFloat(document.getElementById('confine').value);
             const phi = 0.65; //strength reduction factor
             const alpha = 0.8; //column interaction coefficient
             
             // Validate inputs
-            if (isNaN(fc) || isNaN(fy) || isNaN(Pu) || isNaN(rhoi) || isNaN(trans)) {
+            if (isNaN(fc) || isNaN(fy) || isNaN(Pu) || isNaN(rhoi)) {
                 alert("Please enter all values.");
+                return;
+            }
+
+            let phi, alpha;
+            if (confine === 'spiral') {
+                phi = 0.75;
+                alpha = 0.85;
+            } else if (confine === 'tied') {
+                phi = 0.65;
+                alpha = 0.80;
+            } else {
+                alert("Please select a confinement type.");
                 return;
             }
 
