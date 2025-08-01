@@ -664,6 +664,7 @@ const barTable = [
         
         let Soc = (4 * 0.11 * (Dc-0.375))/(ps*Dc*Dc);
         let test = Soc - 0.375;
+        let barTSel;
         
         if (test < 1) {
             let Soc2 = (4 * 0.2 * (Dc-0.5))/(ps*Dc*Dc);
@@ -673,14 +674,13 @@ const barTable = [
             Soc = 3;
             barTSel = 3;
         } else {
-            Soc = Math.floor(Soc/0.25) * 0.25;
+            Soc = Math.min(Math.floor(Soc / 0.25) * 0.25, 3);
             barTSel = 3;
         }
 
         const x = dimension;
         const b = barSel;
         const t = `${barTSel} @ ${Soc}"`;
-        const S = Soc;
 
         output += `<strong>Final Design:</strong><br><br>`;
         output += `Steel Ratio, ρ: ${rho.toFixed(2)}%<br>`;
@@ -700,7 +700,7 @@ const barTable = [
     if (imageURL !== "") {
         output += `
         <div class="diagram-wrapper">
-            <img src="${imageURL}" alt="${barQ} bars tie diagram" class="imagediagram">
+            <img src="${imageURL}" alt="${barQ} bars diagram" class="imagediagram">
             <ul>
                 <li><strong>D</strong> = ${x} in</li>
                 <li><strong>D<sub>c</sub></strong> = ${Dc} in</li>
